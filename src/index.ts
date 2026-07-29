@@ -3,18 +3,26 @@ import cors from "cors";
 import express, { Request, Response, NextFunction } from "express";
 import { initDB } from "./db";
 import { crearParcela } from "./controllers/parcela.controller";
+import { verificarApiKey } from "./middlewares/auth.middleware";
+import {
+  listarParcelas,
+  actualizarEstado,
+} from "./controllers/admin.parcela.controller";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Permitir CORS desde cualquier origen (para desarrollo y producción)
 app.use(cors());
 app.use(express.json());
 
-// Rutas
+// Endpoint público (clientes envían parcelas)
 app.post("/api/parcelas", crearParcela);
 
-// Middleware de manejo de errores
+// Endpoints protegidos (panel de admin)
+app.get("/api/parcelas", verificarApiKey, listarParcelas);
+app.put("/api/parcelas/:id", verificarApiKey, actualizarEstado);
+
+// Middleware de errores
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Error:", err.message);
   res.status(500).json({
