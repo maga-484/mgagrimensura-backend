@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -6,9 +6,7 @@ export const pool = new Pool({
 
 export const initDB = async () => {
   try {
-    // Habilitar PostGIS (si el plan de tu DB lo permite)
-    await pool.query('CREATE EXTENSION IF NOT EXISTS postgis;');
-
+    await pool.query("CREATE EXTENSION IF NOT EXISTS postgis;");
     await pool.query(`
       CREATE TABLE IF NOT EXISTS parcelas (
         id SERIAL PRIMARY KEY,
@@ -23,10 +21,9 @@ export const initDB = async () => {
         estado TEXT DEFAULT 'recibido'
       );
     `);
-
-    console.log('✅ Base de datos inicializada');
+    console.log("✅ Base de datos inicializada");
   } catch (error) {
-    console.error('❌ Error al inicializar la base de datos:', error);
+    console.error("❌ Error al inicializar la base de datos:", error);
     throw error;
   }
 };

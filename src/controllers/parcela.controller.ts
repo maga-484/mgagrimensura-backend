@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
-import { ParcelaSchema } from '../schemas/parcela.schema';
-import { pool } from '../db/index';
+import { Request, Response, NextFunction } from "express";
+import { ParcelaSchema } from "../schemas/parcela.schema";
+import { pool } from "../db/index";
 
 export const crearParcela = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): Promise<void> => {
   try {
     const resultado = ParcelaSchema.safeParse(req.body);
@@ -13,8 +13,8 @@ export const crearParcela = async (
     if (!resultado.success) {
       res.status(400).json({
         success: false,
-        message: 'Datos de entrada inválidos',
-        errors: resultado.error.flatten().fieldErrors
+        message: "Datos de entrada inválidos",
+        errors: resultado.error.flatten().fieldErrors,
       });
       return;
     }
@@ -38,27 +38,26 @@ export const crearParcela = async (
       datos.cliente.nombre,
       datos.cliente.email,
       datos.cliente.telefono || null,
-      datos.cliente.mensaje || null
+      datos.cliente.mensaje || null,
     ];
 
     const dbResult = await pool.query(query, values);
 
     res.status(201).json({
       success: true,
-      message: 'Parcela registrada correctamente',
+      message: "Parcela registrada correctamente",
       data: {
         id: dbResult.rows[0].id,
         fechaCreacion: dbResult.rows[0].fecha_creacion,
         estado: dbResult.rows[0].estado,
-        ...datos
-      }
+        ...datos,
+      },
     });
   } catch (error) {
-    // No exponer detalles internos al cliente
-    console.error('Error en base de datos:', error);
+    console.error("Error en base de datos:", error);
     res.status(500).json({
       success: false,
-      message: 'Error interno del servidor al guardar la parcela'
+      message: "Error interno del servidor al guardar la parcela",
     });
   }
 };
