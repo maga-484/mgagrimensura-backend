@@ -1,6 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export async function enviarCorreoNuevaParcela(datos: {
   id: number;
@@ -11,15 +18,18 @@ export async function enviarCorreoNuevaParcela(datos: {
   fechaCreacion: string;
 }): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail || !process.env.RESEND_API_KEY) {
-    console.log("📧 Email desactivado: falta RESEND_API_KEY o ADMIN_EMAIL");
+  const client = getResend();
+
+  if (!client || !adminEmail) {
+    console.log("📧 Email omitido: falta RESEND_API_KEY o ADMIN_EMAIL");
+    console.log("   Parcela guardada:", datos.clienteNombre, `ID:${datos.id}`);
     return;
   }
 
   const areaHa = (datos.areaM2 / 10000).toFixed(4);
 
   try {
-    await resend.emails.send({
+    await client.emails.send({
       from: "Sistema Agrimensura <onboarding@resend.dev>",
       to: adminEmail,
       subject: `📍 Nueva parcela — ${datos.clienteNombre}`,
