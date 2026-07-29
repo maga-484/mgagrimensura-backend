@@ -3,8 +3,6 @@ import { ParcelaSchema } from "../schemas/parcela.schema";
 import { pool } from "../db/index";
 import { enviarCorreoNuevaParcela } from "../services/email.service";
 
-import { enviarCorreoNuevaParcela } from "../services/email.service";
-
 export const crearParcela = async (
   req: Request,
   res: Response,
@@ -55,10 +53,15 @@ export const crearParcela = async (
       perimetroM: datos.perimetroM,
     };
 
-    // Enviar email en segundo plano (no bloquea la respuesta)
-    enviarCorreoNuevaParcela(parcelaGuardada).catch((err) =>
-      console.error("Error enviando email:", err),
-    );
+    // Enviar email en segundo plano
+    enviarCorreoNuevaParcela({
+      id: dbResult.rows[0].id,
+      clienteNombre: datos.cliente.nombre,
+      clienteEmail: datos.cliente.email,
+      areaM2: datos.areaM2,
+      perimetroM: datos.perimetroM,
+      fechaCreacion: dbResult.rows[0].fecha_creacion,
+    }).catch(console.error);
 
     res.status(201).json({
       success: true,

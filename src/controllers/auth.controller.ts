@@ -12,7 +12,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!adminUser || !adminPass || !jwtSecret) {
       res.status(500).json({
         success: false,
-        mensaje: "Configuración de autenticación incompleta en el servidor",
+        mensaje: "Configuración de autenticación incompleta",
       });
       return;
     }

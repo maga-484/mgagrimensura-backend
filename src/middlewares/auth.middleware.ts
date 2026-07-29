@@ -12,7 +12,7 @@ export const verificarToken = (
   if (!jwtSecret) {
     res.status(500).json({
       success: false,
-      mensaje: "JWT_SECRET no configurado en el servidor",
+      mensaje: "JWT_SECRET no configurado",
     });
     return;
   }
@@ -20,7 +20,7 @@ export const verificarToken = (
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({
       success: false,
-      mensaje: "Token no proporcionado o formato inválido",
+      mensaje: "Token no proporcionado",
     });
     return;
   }
@@ -28,10 +28,9 @@ export const verificarToken = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, jwtSecret);
-    (req as any).usuario = decoded;
+    jwt.verify(token, jwtSecret);
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({
       success: false,
       mensaje: "Token inválido o expirado",
