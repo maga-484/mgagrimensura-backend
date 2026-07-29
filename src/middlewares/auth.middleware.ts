@@ -1,28 +1,40 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-export const verificarApiKey = (
+export const verificarToken = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
-  const apiKey = req.headers['x-api-key'];
-  const validKey = process.env.ADMIN_API_KEY;
+  const authHeader = req.headers.authorization;
+  const jwtSecret = process.env.JWT_SECRET;
 
-  if (!validKey) {
+  if (!jwtSecret) {
     res.status(500).json({
       success: false,
-      message: 'API Key no configurada en el servidor',
+      mensaje: "JWT_SECRET no configurado en el servidor",
     });
     return;
   }
 
-  if (!apiKey || apiKey !== validKey) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({
       success: false,
-      message: 'API Key inválida o no proporcionada',
+      mensaje: "Token no proporcionado o formato inválido",
     });
     return;
   }
 
-  next();
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    (req as any).usuario = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      mensaje: "Token inválido o expirado",
+    });
+  }
 };

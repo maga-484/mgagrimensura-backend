@@ -3,7 +3,8 @@ import cors from "cors";
 import express, { Request, Response, NextFunction } from "express";
 import { initDB } from "./db";
 import { crearParcela } from "./controllers/parcela.controller";
-import { verificarApiKey } from "./middlewares/auth.middleware";
+import { login } from "./controllers/auth.controller";
+import { verificarToken } from "./middlewares/auth.middleware";
 import {
   listarParcelas,
   actualizarEstado,
@@ -18,9 +19,12 @@ app.use(express.json());
 // Endpoint público (clientes envían parcelas)
 app.post("/api/parcelas", crearParcela);
 
-// Endpoints protegidos (panel de admin)
-app.get("/api/parcelas", verificarApiKey, listarParcelas);
-app.put("/api/parcelas/:id", verificarApiKey, actualizarEstado);
+// Endpoint de autenticación
+app.post("/api/login", login);
+
+// Endpoints protegidos con JWT (panel de admin)
+app.get("/api/parcelas", verificarToken, listarParcelas);
+app.put("/api/parcelas/:id", verificarToken, actualizarEstado);
 
 // Middleware de errores
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
