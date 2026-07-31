@@ -12,7 +12,7 @@ import {
 import { exportarGeoJSON } from "./controllers/export.controller";
 import { listarLogs } from "./controllers/logs.controller";
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -37,7 +37,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-const start = async () => {
+export async function startServer() {
   try {
     await initDB();
     app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
@@ -45,6 +45,9 @@ const start = async () => {
     console.error("No se pudo iniciar:", error);
     process.exit(1);
   }
-};
+}
 
-start();
+// Solo iniciar servidor si NO estamos en tests
+if (process.env.NODE_ENV !== "test") {
+  startServer();
+}
