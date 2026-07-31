@@ -7,6 +7,7 @@ export const pool = new Pool({
 export const initDB = async () => {
   try {
     await pool.query("CREATE EXTENSION IF NOT EXISTS postgis;");
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS parcelas (
         id SERIAL PRIMARY KEY,
@@ -21,6 +22,18 @@ export const initDB = async () => {
         estado TEXT DEFAULT 'recibido'
       );
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS logs_admin (
+        id SERIAL PRIMARY KEY,
+        usuario TEXT NOT NULL,
+        accion TEXT NOT NULL,
+        detalles JSONB,
+        ip TEXT,
+        fecha TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     console.log("✅ Base de datos inicializada");
   } catch (error) {
     console.error("❌ Error al inicializar la base de datos:", error);

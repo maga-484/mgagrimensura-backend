@@ -9,6 +9,8 @@ import {
   listarParcelas,
   actualizarEstado,
 } from "./controllers/admin.parcela.controller";
+import { exportarGeoJSON } from "./controllers/export.controller";
+import { listarLogs } from "./controllers/logs.controller";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,11 +18,17 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Público
 app.post("/api/parcelas", crearParcela);
 app.post("/api/login", login);
+
+// Protegidos
 app.get("/api/parcelas", verificarToken, listarParcelas);
 app.put("/api/parcelas/:id", verificarToken, actualizarEstado);
+app.get("/api/export/geojson", verificarToken, exportarGeoJSON);
+app.get("/api/logs", verificarToken, listarLogs);
 
+// Errores
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Error:", err.message);
   res.status(500).json({

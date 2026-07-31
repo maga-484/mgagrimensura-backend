@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { registrarLog } from "../services/log.service";
 
-export const verificarToken = (
+export const verificarToken = async (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): Promise<void> => {
   const authHeader = req.headers.authorization;
   const jwtSecret = process.env.JWT_SECRET;
 
@@ -28,7 +29,21 @@ export const verificarToken = (
   const token = authHeader.split(" ")[1];
 
   try {
-    jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { usuario: string };
+    (req as any).usuario = decoded;
+
+    // Registrar log de la acción
+    const ip =
+      req.headers["x-forwarded-for"]?.toString() ||
+      req.socket.remoteAddress ||
+      "unknown";
+    await registrarLog(
+      decoded.usuario,
+      `${req.method} ${req.path}`,
+      { query: req.query, body: req.body },
+      ip,
+    );
+
     next();
   } catch {
     res.status(401).json({

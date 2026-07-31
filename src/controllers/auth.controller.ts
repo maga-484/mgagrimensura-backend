@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { registrarLog } from "../services/log.service";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -18,6 +19,18 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (usuario !== adminUser || password !== adminPass) {
+      // Log de intento fallido
+      const ip =
+        req.headers["x-forwarded-for"]?.toString() ||
+        req.socket.remoteAddress ||
+        "unknown";
+      await registrarLog(
+        usuario || "anonimo",
+        "LOGIN_FALLIDO",
+        { razon: "Credenciales invalidas" },
+        ip,
+      );
+
       res.status(401).json({
         success: false,
         mensaje: "Credenciales inválidas",
@@ -26,6 +39,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ usuario }, jwtSecret, { expiresIn: "24h" });
+
+    // Log de login exitoso
+    const ip =
+      req.headers["x-forwarded-for"]?.toString() ||
+      req.socket.remoteAddress ||
+      "unknown";
+    await registrarLog(usuario, "LOGIN_EXITOSO", {}, ip);
 
     res.status(200).json({
       success: true,
