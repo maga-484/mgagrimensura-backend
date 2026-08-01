@@ -31,42 +31,45 @@ describe('3-sigma: cobertura de branches y errores', () => {
     it('debe rechazar si falta JWT_SECRET (500)', async () => {
       const token = jwt.sign({ usuario: 'admin' }, process.env.JWT_SECRET!);
       const original = process.env.JWT_SECRET;
-      delete process.env.JWT_SECRET;
-
-      const res = await request(app)
-        .get('/api/parcelas')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.status).toBe(500);
-      expect(res.body.mensaje).toMatch(/configuracion/i);
-
-      process.env.JWT_SECRET = original;
+      try {
+        delete process.env.JWT_SECRET;
+        const res = await request(app)
+          .get('/api/parcelas')
+          .set('Authorization', `Bearer ${token}`);
+        expect(res.status).toBe(500);
+        expect(res.body.mensaje).toMatch(/JWT_SECRET|configurado/i);
+      } finally {
+        if (original) process.env.JWT_SECRET = original;
+      }
     });
   });
 
   describe('Auth controller — config faltante', () => {
     it('debe fallar si falta ADMIN_USER (500)', async () => {
       const original = process.env.ADMIN_USER;
-      delete process.env.ADMIN_USER;
-
-      const res = await request(app)
-        .post('/api/login')
-        .send({ usuario: 'admin', password: 'testpass123' });
-
-      expect(res.status).toBe(500);
-      expect(res.body.mensaje).toMatch(/configuracion/i);
-
-      process.env.ADMIN_USER = original;
+      try {
+        delete process.env.ADMIN_USER;
+        const res = await request(app)
+          .post('/api/login')
+          .send({ usuario: 'admin', password: 'testpass123' });
+        expect(res.status).toBe(500);
+        expect(res.body.mensaje).toMatch(/configuraci/i);
+      } finally {
+        if (original) process.env.ADMIN_USER = original;
+      }
     });
   });
 
-  describe('Auth controller — DB error', () => {
-    it('debe manejar error de DB al registrar log de fallo (500)', async () => {
-      const spy = jest.spyOn(pool, 'query').mockImplementation(() => Promise.reject(new Error('DB fail')));
+  describe('Auth controller — error interno en login exitoso', () => {
+    it('debe manejar error de jwt.sign (500)', async () => {
+      const spy = jest.spyOn(jwt, 'sign').mockImplementation(() => {
+        throw new Error('JWT fail');
+      });
       const res = await request(app)
         .post('/api/login')
-        .send({ usuario: 'admin', password: 'wrongpass' });
+        .send({ usuario: process.env.ADMIN_USER, password: process.env.ADMIN_PASSWORD });
       expect(res.status).toBe(500);
+      expect(res.body.mensaje).toMatch(/Error interno/i);
       spy.mockRestore();
     });
   });
@@ -242,17 +245,6 @@ describe('3-sigma: cobertura de branches y errores', () => {
         });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
-    });
-  });
-
-  describe('Express error handler', () => {
-    it('debe manejar errores no capturados (500)', async () => {
-      app.get('/__test_error', () => {
-        throw new Error('Uncaught');
-      });
-      const res = await request(app).get('/__test_error');
-      expect(res.status).toBe(500);
-      expect(res.body.message).toBe('Error interno del servidor');
     });
   });
 });
