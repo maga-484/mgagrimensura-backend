@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
-import { z } from 'zod';
-import { pool } from '../db/index';
+import { Request, Response } from "express";
+import { z } from "zod";
+import { pool } from "../db/index";
 
-const EstadoSchema = z.enum(['recibido', 'en proceso', 'finalizado']);
+const EstadoSchema = z.enum(["nueva", "en proceso", "finalizado"]);
 
 export const listarParcelas = async (
   _req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const query = `
@@ -41,24 +41,24 @@ export const listarParcelas = async (
       data: parcelas,
     });
   } catch (error) {
-    console.error('Error listando parcelas:', error);
+    console.error("Error listando parcelas:", error);
     res.status(500).json({
       success: false,
-      message: 'Error interno al obtener las parcelas',
+      message: "Error interno al obtener las parcelas",
     });
   }
 };
 
 export const actualizarEstado = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id)) {
       res.status(400).json({
         success: false,
-        message: 'ID de parcela inválido',
+        message: "ID de parcela inválido",
       });
       return;
     }
@@ -67,7 +67,7 @@ export const actualizarEstado = async (
     if (!parseResult.success) {
       res.status(400).json({
         success: false,
-        message: 'Estado inválido',
+        message: "Estado inválido",
         errors: parseResult.error.flatten().fieldErrors,
       });
       return;
@@ -95,7 +95,7 @@ export const actualizarEstado = async (
     if (result.rowCount === 0) {
       res.status(404).json({
         success: false,
-        message: 'Parcela no encontrada',
+        message: "Parcela no encontrada",
       });
       return;
     }
@@ -103,7 +103,7 @@ export const actualizarEstado = async (
     const row = result.rows[0];
     res.status(200).json({
       success: true,
-      message: 'Estado actualizado correctamente',
+      message: "Estado actualizado correctamente",
       data: {
         id: row.id,
         clienteNombre: row.cliente_nombre,
@@ -116,10 +116,10 @@ export const actualizarEstado = async (
       },
     });
   } catch (error) {
-    console.error('Error actualizando estado:', error);
+    console.error("Error actualizando estado:", error);
     res.status(500).json({
       success: false,
-      message: 'Error interno al actualizar la parcela',
+      message: "Error interno al actualizar la parcela",
     });
   }
 };

@@ -50,3 +50,39 @@ export async function enviarCorreoNuevaParcela(datos: {
     console.error("❌ Error enviando email:", error);
   }
 }
+export async function enviarCorreoACliente(datos: {
+  id: number;
+  clienteNombre: string;
+  clienteEmail: string;
+  estado: string;
+  asunto: string;
+  mensaje: string;
+}): Promise<void> {
+  const client = getResend();
+
+  if (!client || !process.env.ADMIN_EMAIL) {
+    console.log(
+      "📧 Email a cliente omitido: falta RESEND_API_KEY o ADMIN_EMAIL",
+    );
+    return;
+  }
+
+  try {
+    await client.emails.send({
+      from: "Sistema Agrimensura <onboarding@resend.dev>",
+      to: datos.clienteEmail,
+      subject: datos.asunto,
+      html: `
+        <h2>Hola ${datos.clienteNombre},</h2>
+        <p>${datos.mensaje}</p>
+        <p><strong>ID de parcela:</strong> ${datos.id}</p>
+        <p><strong>Estado actual:</strong> ${datos.estado}</p>
+        <hr>
+        <p>Sistema de Gestión Agrimensura</p>
+      `,
+    });
+    console.log("✅ Email enviado a cliente:", datos.clienteEmail);
+  } catch (error) {
+    console.error("❌ Error enviando email a cliente:", error);
+  }
+}

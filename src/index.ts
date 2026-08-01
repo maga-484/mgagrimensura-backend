@@ -11,6 +11,7 @@ import {
 } from "./controllers/admin.parcela.controller";
 import { exportarGeoJSON } from "./controllers/export.controller";
 import { listarLogs } from "./controllers/logs.controller";
+import { notificarCliente } from "./controllers/notificacion.controller";
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.get("/api/parcelas", verificarToken, listarParcelas);
 app.put("/api/parcelas/:id", verificarToken, actualizarEstado);
 app.get("/api/export/geojson", verificarToken, exportarGeoJSON);
 app.get("/api/logs", verificarToken, listarLogs);
+app.post("/api/parcelas/:id/notificar", verificarToken, notificarCliente);
 
 // Errores
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

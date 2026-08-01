@@ -18,10 +18,19 @@ export const initDB = async () => {
         cliente_email TEXT NOT NULL,
         cliente_telefono TEXT,
         cliente_mensaje TEXT,
+        notas_internas TEXT,
         fecha_creacion TIMESTAMP DEFAULT NOW(),
-        estado TEXT DEFAULT 'recibido'
+        estado TEXT DEFAULT 'nueva'
       );
     `);
+
+    // Migraciones idempotentes para DBs existentes
+    await pool.query(
+      `ALTER TABLE parcelas ADD COLUMN IF NOT EXISTS notas_internas TEXT;`,
+    );
+    await pool.query(
+      `ALTER TABLE parcelas ALTER COLUMN estado SET DEFAULT 'nueva';`,
+    );
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS logs_admin (
