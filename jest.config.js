@@ -6,10 +6,21 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts'],
   setupFiles: ['<rootDir>/src/__tests__/setupEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        sourceMap: true,
+      },
+    }],
+  },
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/__tests__/**',
+  ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
