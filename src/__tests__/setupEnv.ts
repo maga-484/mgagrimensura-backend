@@ -4,9 +4,9 @@ process.env.DATABASE_URL =
   process.env.DATABASE_URL ||
   "postgresql://postgres@localhost:5432/mgagrimensura_test";
 
-process.env.JWT_SECRET = "test_jwt_secret_key";
+process.env.JWT_SECRET = "local_test_jwt_2026_only";
 process.env.ADMIN_USER = "admin";
-process.env.ADMIN_PASSWORD = "testpass123";
+process.env.ADMIN_PASSWORD = "local_test_pass_2026_only";
 process.env.ADMIN_EMAIL = "";
 process.env.RESEND_API_KEY = "";
 process.env.EMAIL_USER = "";
